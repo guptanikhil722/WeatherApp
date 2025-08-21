@@ -7,6 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { WeatherData, ForecastData } from '../types/weather';
+import { useAppContext } from '../context/NewsWeather';
 import { 
   getResponsiveFontSize, 
   getResponsivePadding, 
@@ -22,6 +23,8 @@ interface WeatherCardProps {
 }
 
 const WeatherCard: React.FC<WeatherCardProps> = ({ weather, forecast }) => {
+  const { userSettings } = useAppContext();
+  
   const getWeatherIcon = (weatherMain: string) => {
     switch (weatherMain.toLowerCase()) {
       case 'clear':
@@ -44,14 +47,14 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ weather, forecast }) => {
     }
   };
 
+  const getTemperatureUnit = () => {
+    return userSettings.temperatureUnit === 'fahrenheit' ? '°F' : '°C';
+  };
+
   const getDailyForecast = () => {
     if (!forecast || !forecast.list) {
-      console.log('No forecast data available:', forecast);
       return [];
     }
-    
-    console.log('Forecast data received:', forecast);
-    console.log('Forecast list length:', forecast.list.length);
     
     const dailyData: { [key: string]: any[] } = {};
     
@@ -65,8 +68,6 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ weather, forecast }) => {
       dailyData[dayKey].push(item);
     });
     
-    console.log('Daily data grouped:', dailyData);
-    
     // Get the next 5 days (excluding today)
     const next5Days = Object.keys(dailyData)
       .filter(day => {
@@ -75,8 +76,6 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ weather, forecast }) => {
         return dayDate.getDate() !== today.getDate();
       })
       .slice(0, 5);
-    
-    console.log('Next 5 days:', next5Days);
     
     return next5Days.map(day => {
       const dayData = dailyData[day];
@@ -105,6 +104,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ weather, forecast }) => {
   };
 
   const dailyForecast = getDailyForecast();
+  const tempUnit = getTemperatureUnit();
 
   return (
     <View style={styles.container}>
@@ -117,7 +117,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ weather, forecast }) => {
 
       <View style={styles.mainInfo}>
         <Text style={styles.temperature}>
-          {Math.round(weather.main.temp)}°C
+          {Math.round(weather.main.temp)}{tempUnit}
         </Text>
         <Text style={styles.weatherIcon}>
           {getWeatherIcon(weather.weather[0]?.main || '')}
@@ -128,7 +128,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ weather, forecast }) => {
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>Feels like</Text>
           <Text style={styles.detailValue}>
-            {Math.round(weather.main.feels_like)}°C
+            {Math.round(weather.main.feels_like)}{tempUnit}
           </Text>
         </View>
         
@@ -162,7 +162,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ weather, forecast }) => {
                 <Text style={styles.forecastIcon}>
                   {getWeatherIcon(day.weather)}
                 </Text>
-                <Text style={styles.forecastTemp}>{day.temp}°C</Text>
+                <Text style={styles.forecastTemp}>{day.temp}{tempUnit}</Text>
                 <Text style={styles.forecastDescription} numberOfLines={1}>
                   {day.description}
                 </Text>

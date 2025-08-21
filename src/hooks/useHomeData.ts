@@ -29,6 +29,14 @@ export const useHomeData = () => {
     }
   }, [newsData, weatherData, userSettings.enableWeatherFiltering, getFilteredNews]);
 
+  // Refresh weather data when temperature unit changes
+  useEffect(() => {
+    if (weatherData) {
+      // Refetch weather data with new temperature unit
+      loadData();
+    }
+  }, [userSettings.temperatureUnit]);
+
   // Fetch news when category filter changes
   useEffect(() => {
     if (selectedCategoryFilter !== 'all') {

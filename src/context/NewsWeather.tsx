@@ -100,16 +100,14 @@ export const NewsWeatherProvider: React.FC<NewsWeatherProviderProps> = ({ childr
       setWeatherLoading(true);
       setWeatherError(null);
       
-      console.log('Fetching weather data for coordinates:', lat, lon);
+      // Convert temperature unit to API format
+      const units = userSettings.temperatureUnit === 'fahrenheit' ? 'imperial' : 'metric';
       
       // Fetch both current weather and forecast
       const [currentWeather, forecast] = await Promise.all([
-        fetchWeather(lat, lon),
-        fetchWeatherForecast(lat, lon)
+        fetchWeather(lat, lon, units),
+        fetchWeatherForecast(lat, lon, units)
       ]);
-      
-      console.log('Current weather received:', currentWeather);
-      console.log('Forecast received:', forecast);
       
       setWeatherData(currentWeather);
       setForecastData(forecast);
@@ -119,7 +117,7 @@ export const NewsWeatherProvider: React.FC<NewsWeatherProviderProps> = ({ childr
     } finally {
       setWeatherLoading(false);
     }
-  }, []);
+  }, [userSettings.temperatureUnit]);
 
   const fetchNewsData = useCallback(async (category?: string) => {
     try {
